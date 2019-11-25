@@ -334,7 +334,7 @@ void VioParametersReader::readConfigFile(const std::string& filename) {
                     calibrations[i].distortionCoefficients[1],
                     calibrations[i].distortionCoefficients[2],
                     calibrations[i].distortionCoefficients[3])/*, id ?*/)),
-          okvis::cameras::NCameraSystem::Equidistant/*, computeOverlaps ?*/);
+          okvis::cameras::NCameraSystem::Equidistant, /*computeOverlap*/ true, /*isLidar*/false);
       std::stringstream s;
       s << calibrations[i].T_SC.T();
       LOG(INFO) << "Equidistant pinhole camera " << camIdx
@@ -357,7 +357,7 @@ void VioParametersReader::readConfigFile(const std::string& filename) {
                     calibrations[i].distortionCoefficients[1],
                     calibrations[i].distortionCoefficients[2],
                     calibrations[i].distortionCoefficients[3])/*, id ?*/)),
-          okvis::cameras::NCameraSystem::RadialTangential/*, computeOverlaps ?*/);
+          okvis::cameras::NCameraSystem::RadialTangential, /*computeOverlap*/ true, /*isLidar*/false);
       std::stringstream s;
       s << calibrations[i].T_SC.T();
       LOG(INFO) << "Radial tangential pinhole camera " << camIdx
@@ -384,7 +384,7 @@ void VioParametersReader::readConfigFile(const std::string& filename) {
                     calibrations[i].distortionCoefficients[5],
                     calibrations[i].distortionCoefficients[6],
                     calibrations[i].distortionCoefficients[7])/*, id ?*/)),
-          okvis::cameras::NCameraSystem::RadialTangential8/*, computeOverlaps ?*/);
+          okvis::cameras::NCameraSystem::RadialTangential8, /*computeOverlap*/ true, /*isLidar*/false);
       std::stringstream s;
       s << calibrations[i].T_SC.T();
       LOG(INFO) << "Radial tangential 8 pinhole camera " << camIdx

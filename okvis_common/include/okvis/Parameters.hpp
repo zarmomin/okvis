@@ -50,7 +50,7 @@
 #include <Eigen/Dense>
 #include <okvis/Time.hpp>
 #include <okvis/MultiFrame.hpp>
-#include <okvis/cameras/NCameraSystem.hpp>
+#include <okvis/cameras/NCameraSystemWithLidar.hpp>
 #include <okvis/kinematics/Transformation.hpp>
 
 /// \brief okvis Main namespace of this package.
@@ -283,7 +283,7 @@ struct VioParameters {
   Visualization visualization;  ///< Visualization parameters.
   SensorsInformation sensors_information; ///< Information on camera and IMU setup.
   ExtrinsicsEstimationParameters camera_extrinsics; ///< Camera extrinsic estimation parameters.
-  okvis::cameras::NCameraSystem nCameraSystem;  ///< Camera configuration.
+  okvis::cameras::NCameraSystemWithLidar nCameraSystem;  ///< Camera configuration.
   ImuParameters imu;  ///< IMU parameters
   MagnetometerParameters magnetometer;  ///< Magnetometer parameters.
   PositionSensorParameters position;  ///< Position sensor parameters.

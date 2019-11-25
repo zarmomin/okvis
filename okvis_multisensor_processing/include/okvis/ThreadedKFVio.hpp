@@ -46,7 +46,7 @@
 #include <condition_variable>
 #include <atomic>
 
-#include <okvis/cameras/NCameraSystem.hpp>
+#include <okvis/cameras/NCameraSystemWithLidar.hpp>
 #include <okvis/Measurements.hpp>
 #include <okvis/Frontend.hpp>
 #include <okvis/MultiFrame.hpp>
