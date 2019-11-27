@@ -97,23 +97,6 @@ public:
       Eigen::Matrix2Xd predicted_keypoints =
           previous_keyframe[frame_idx].keypoint_measurements;
 
-      /*
-      // Get the relative motion of the camera using the extrinsics of the
-      // camera system.
-      const aslam::Quaternion& q_C_B =
-          ncamera.get_T_C_B(frame_idx).getRotation();
-      aslam::Quaternion q_Ckp1_Ck = q_C_B * q_Icurr_Iprev * q_C_B.inverse();
-      Eigen::Matrix2Xd predicted_keypoints;
-      const Eigen::Matrix2Xd &prev_keypoints
-          = previous_keyframe[frame_idx].keypoint_measurements;
-      std::vector<unsigned char> prediction_success;
-      aslam::predictKeypointsByRotation(
-          ncamera.getCamera(frame_idx), prev_keypoints, q_Ckp1_Ck,
-          &predicted_keypoints, &prediction_success);
-      CHECK_EQ(
-          prediction_success.size(), predicted_keypoints.cols());
-        */
-
       KeyframeFeaturesToCvPoints(predicted_keypoints, &keypoints_curr);
 
       // Track features from last to current frame using LK.
