@@ -43,9 +43,9 @@
 
 #include <memory>
 #include <okvis/assert_macros.hpp>
-#include <okvis/Frame.hpp>
+#include <okvis/LidarFrame.hpp>
 #include <okvis/MultiFrame.hpp>
-#include <okvis/cameras/NCameraSystem.hpp>
+#include <okvis/cameras/NCameraSystemWithLidar.hpp>
 
 
 /// \brief okvis Main namespace of this package.
@@ -76,7 +76,7 @@ class MultiFrameWithLidar : public MultiFrame
   /// \brief (Re)set the NCameraSystem -- which clears the frames as well.
   /// @param[in] cameraSystem The camera system for which this is a multi-frame.
   inline void resetCameraSystemAndFrames(
-      const cameras::NCameraSystem & cameraSystem);
+      const cameras::NCameraSystemWithLidar & cameraSystem);
 
   /// \brief (Re)set the timestamp
   /// @param[in] timestamp The time this frame was recorded.
@@ -268,6 +268,7 @@ class MultiFrameWithLidar : public MultiFrame
   okvis::Time timestamp_;  ///< the frame timestamp
   uint64_t id_;  ///< the frame id
   std::vector<Frame, Eigen::aligned_allocator<Frame>> frames_;  ///< the individual frames
+  LidarFrame lidarFrame_;
   cameras::NCameraSystemWithLidar cameraSystem_;  ///< the camera system
 };
 

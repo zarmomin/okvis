@@ -89,6 +89,31 @@ Frontend::Frontend(size_t numCameras)
 }
 
 // Detection and descriptor extraction on a per image basis.
+bool Frontend::detectAndDescribeWithLidar(size_t cameraIndex,
+                                 std::shared_ptr<okvis::MultiFrameWithLidar> frameOut,
+                                 const okvis::kinematics::Transformation& T_WC,
+                                 const std::vector<cv::KeyPoint> * keypoints) {
+  OKVIS_ASSERT_TRUE_DBG(Exception, cameraIndex < numCameras_, "Camera index exceeds number of cameras.");
+  std::lock_guard<std::mutex> lock(*featureDetectorMutexes_[cameraIndex]);
+
+  // check there are no keypoints here
+  OKVIS_ASSERT_TRUE(Exception, keypoints == nullptr, "external keypoints currently not supported")
+
+  frameOut->setDetector(cameraIndex, featureDetectors_[cameraIndex]);
+  frameOut->setExtractor(cameraIndex, descriptorExtractors_[cameraIndex]);
+
+  frameOut->detect(cameraIndex);
+
+  // ExtractionDirection == gravity direction in camera frame
+  Eigen::Vector3d g_in_W(0, 0, -1);
+  Eigen::Vector3d extractionDirection = T_WC.inverse().C() * g_in_W;
+  frameOut->describe(cameraIndex, extractionDirection);
+
+  // set detector/extractor to nullpointer? TODO
+  return true;
+}
+
+// Detection and descriptor extraction on a per image basis.
 bool Frontend::detectAndDescribe(size_t cameraIndex,
                                  std::shared_ptr<okvis::MultiFrame> frameOut,
                                  const okvis::kinematics::Transformation& T_WC,
@@ -121,6 +146,7 @@ bool Frontend::dataAssociationAndInitialization(
     const std::shared_ptr<okvis::MapPointVector> /*map*/, // TODO sleutenegger: why is this not used here?
     std::shared_ptr<okvis::MultiFrame> framesInOut,
     bool *asKeyframe) {
+
   // match new keypoints to existing landmarks/keypoints
   // initialise new landmarks (states)
   // outlier rejection by consistency check
@@ -264,6 +290,163 @@ bool Frontend::dataAssociationAndInitialization(
     default:
       OKVIS_THROW(Exception, "Unsupported distortion type.")
       break;
+  }
+  matchStereoTimer.stop();
+
+  return true;
+}
+
+// Matching as well as initialization of landmarks and state.
+bool Frontend::dataAssociationAndInitializationWithLidar(
+    okvis::Estimator& estimator,
+    okvis::kinematics::Transformation& /*T_WS_propagated*/, // TODO sleutenegger: why is this not used here?
+    const okvis::VioParameters &params,
+    const std::shared_ptr<okvis::MapPointVector> /*map*/, // TODO sleutenegger: why is this not used here?
+    std::shared_ptr<okvis::MultiFrameWithLidar> framesInOut,
+    bool *asKeyframe) {
+  // match new keypoints to existing landmarks/keypoints
+  // initialise new landmarks (states)
+  // outlier rejection by consistency check
+  // RANSAC (2D2D / 3D2D)
+  // decide keyframe
+  // left-right stereo match & init
+
+  // find distortion type
+  okvis::cameras::NCameraSystem::DistortionType distortionType = params.nCameraSystem
+      .distortionType(0);
+  for (size_t i = 1; i < params.nCameraSystem.numCameras(); ++i) {
+    OKVIS_ASSERT_TRUE(Exception,
+                      distortionType == params.nCameraSystem.distortionType(i),
+                      "mixed frame types are not supported yet");
+  }
+  int num3dMatches = 0;
+
+  // first frame? (did do addStates before, so 1 frame minimum in estimator)
+  if (estimator.numFrames() > 1) {
+
+    int requiredMatches = 5;
+
+    double uncertainMatchFraction = 0;
+    bool rotationOnly = false;
+
+    // match to last keyframe
+    TimerSwitchable matchKeyframesTimer("2.4.1 matchToKeyframes");
+    switch (distortionType) {
+    case okvis::cameras::NCameraSystem::RadialTangential: {
+      num3dMatches = matchToKeyframes<
+          VioKeyframeWindowMatchingAlgorithm<
+              okvis::cameras::PinholeCamera<
+                  okvis::cameras::RadialTangentialDistortion> > >(
+          estimator, params, framesInOut->id(), rotationOnly, false,
+          &uncertainMatchFraction);
+      break;
+    }
+    case okvis::cameras::NCameraSystem::Equidistant: {
+      num3dMatches = matchToKeyframes<
+          VioKeyframeWindowMatchingAlgorithm<
+              okvis::cameras::PinholeCamera<
+                  okvis::cameras::EquidistantDistortion> > >(
+          estimator, params, framesInOut->id(), rotationOnly, false,
+          &uncertainMatchFraction);
+      break;
+    }
+    case okvis::cameras::NCameraSystem::RadialTangential8: {
+      num3dMatches = matchToKeyframes<
+          VioKeyframeWindowMatchingAlgorithm<
+              okvis::cameras::PinholeCamera<
+                  okvis::cameras::RadialTangentialDistortion8> > >(
+          estimator, params, framesInOut->id(), rotationOnly, false,
+          &uncertainMatchFraction);
+      break;
+    }
+    default:
+    OKVIS_THROW(Exception, "Unsupported distortion type.")
+      break;
+    }
+    matchKeyframesTimer.stop();
+    if (!isInitialized_) {
+      if (!rotationOnly) {
+        isInitialized_ = true;
+        LOG(INFO) << "Initialized!";
+      }
+    }
+
+    if (num3dMatches <= requiredMatches) {
+      LOG(WARNING) << "Tracking failure. Number of 3d2d-matches: " << num3dMatches;
+    }
+
+    // keyframe decision, at the moment only landmarks that match with keyframe are initialised
+    *asKeyframe = *asKeyframe || doWeNeedANewKeyframe(estimator, framesInOut);
+
+    // match to last frame
+    TimerSwitchable matchToLastFrameTimer("2.4.2 matchToLastFrame");
+    switch (distortionType) {
+    case okvis::cameras::NCameraSystem::RadialTangential: {
+      matchToLastFrame<
+          VioKeyframeWindowMatchingAlgorithm<
+              okvis::cameras::PinholeCamera<
+                  okvis::cameras::RadialTangentialDistortion> > >(
+          estimator, params, framesInOut->id(),
+          false);
+      break;
+    }
+    case okvis::cameras::NCameraSystem::Equidistant: {
+      matchToLastFrame<
+          VioKeyframeWindowMatchingAlgorithm<
+              okvis::cameras::PinholeCamera<
+                  okvis::cameras::EquidistantDistortion> > >(
+          estimator, params, framesInOut->id(),
+          false);
+      break;
+    }
+    case okvis::cameras::NCameraSystem::RadialTangential8: {
+      matchToLastFrame<
+          VioKeyframeWindowMatchingAlgorithm<
+              okvis::cameras::PinholeCamera<
+                  okvis::cameras::RadialTangentialDistortion8> > >(
+          estimator, params, framesInOut->id(),
+          false);
+
+      break;
+    }
+    default:
+    OKVIS_THROW(Exception, "Unsupported distortion type.")
+      break;
+    }
+    matchToLastFrameTimer.stop();
+  } else
+    *asKeyframe = true;  // first frame needs to be keyframe
+
+  // do stereo match to get new landmarks
+  TimerSwitchable matchStereoTimer("2.4.3 matchStereo");
+  switch (distortionType) {
+  case okvis::cameras::NCameraSystem::RadialTangential: {
+    matchStereo<
+        VioKeyframeWindowMatchingAlgorithm<
+            okvis::cameras::PinholeCamera<
+                okvis::cameras::RadialTangentialDistortion> > >(estimator,
+                                                                framesInOut);
+    break;
+  }
+  case okvis::cameras::NCameraSystem::Equidistant: {
+    matchStereo<
+        VioKeyframeWindowMatchingAlgorithm<
+            okvis::cameras::PinholeCamera<
+                okvis::cameras::EquidistantDistortion> > >(estimator,
+                                                           framesInOut);
+    break;
+  }
+  case okvis::cameras::NCameraSystem::RadialTangential8: {
+    matchStereo<
+        VioKeyframeWindowMatchingAlgorithm<
+            okvis::cameras::PinholeCamera<
+                okvis::cameras::RadialTangentialDistortion8> > >(estimator,
+                                                                 framesInOut);
+    break;
+  }
+  default:
+  OKVIS_THROW(Exception, "Unsupported distortion type.")
+    break;
   }
   matchStereoTimer.stop();
 

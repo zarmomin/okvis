@@ -42,7 +42,7 @@
 #include "okvis/cameras/NoDistortion.hpp"
 #include "okvis/cameras/RadialTangentialDistortion.hpp"
 #include "okvis/cameras/EquidistantDistortion.hpp"
-#include "okvis/MultiFrame.hpp"
+#include "okvis/MultiFrameWithLidar.hpp
 
 TEST(MulitFrame, functions)
 {
@@ -76,7 +76,7 @@ TEST(MulitFrame, functions)
               Eigen::Vector3d(0.1, -0.1, -0.1), Eigen::Quaterniond(0, 0, 1, 0))));
 
   okvis::cameras::NCameraSystem nCameraSystem(T_SC, cameras, distortions, true);  // computes overlaps
-  okvis::MultiFrame multiFrame(nCameraSystem, okvis::Time::now(), 1);
+  okvis::MultiFrameWithLidar multiFrame(nCameraSystem, okvis::Time::now(), 1);
 
   for (size_t c = 0; c < cameras.size(); ++c) {
     //std::cout << "Testing MultiFrame with " << cameras.at(c)->type() << std::endl;

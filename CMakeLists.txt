@@ -288,6 +288,10 @@ include_directories(okvis_time/include)
 add_subdirectory(okvis_time)
 add_dependencies(okvis_time okvis_util)
 
+include_directories(okvis_lidar/include)
+add_subdirectory(okvis_lidar)
+add_dependencies(okvis_lidar brisk)
+
 include_directories(okvis_cv/include)
 add_subdirectory(okvis_cv)
 add_dependencies(okvis_cv brisk okvis_util)
@@ -322,6 +326,7 @@ if(BUILD_APPS)
   target_link_libraries(okvis_app_synchronous
     okvis_util
     okvis_kinematics
+    okvis_lidar
     okvis_time
     okvis_cv
     okvis_common
@@ -347,6 +352,7 @@ export (TARGETS
     okvis_app_synchronous
     okvis_util
     okvis_kinematics
+    okvis_lidar
     okvis_time
     okvis_cv
     okvis_common
@@ -365,6 +371,7 @@ file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
 set(CONF_INCLUDE_DIRS
   "${PROJECT_SOURCE_DIR}/okvis_util/include"
   "${PROJECT_SOURCE_DIR}/okvis_kinematics/include"
+  "${PROJECT_SOURCE_DIR}/okvis_lidar/include"
   "${PROJECT_SOURCE_DIR}/okvis_time/include"
   "${PROJECT_SOURCE_DIR}/okvis_cv/include"
   "${PROJECT_SOURCE_DIR}/okvis_common/include"

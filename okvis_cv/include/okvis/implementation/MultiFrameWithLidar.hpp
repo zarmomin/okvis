@@ -68,6 +68,7 @@ void MultiFrameWithLidar::resetCameraSystemAndFrames(
   for(size_t c = 0; c<numFrames(); ++c){
     frames_[c].setGeometry(cameraSystem.cameraGeometry(c));
   }
+  lidarFrame_.setGeometry(cameraSystem.lidarCameraGeometry());
 }
 
 // (Re)set the timestamp

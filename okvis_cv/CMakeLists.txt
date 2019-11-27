@@ -21,6 +21,7 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC okvis_util
   PUBLIC okvis_kinematics 
   PUBLIC okvis_time
+  PUBLIC okvis_lidar
   PRIVATE ${OpenCV_LIBRARIES} 
   PRIVATE ${BRISK_LIBRARIES}
 )

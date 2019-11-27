@@ -45,6 +45,7 @@
 #include <okvis/assert_macros.hpp>
 #include <okvis/Estimator.hpp>
 #include <okvis/VioFrontendInterface.hpp>
+#include <okvis/MultiFrameWithLidar.hpp>
 #include <okvis/timing/Timer.hpp>
 #include <okvis/DenseMatcher.hpp>
 
@@ -85,6 +86,24 @@ class Frontend : public VioFrontendInterface {
    * @warning Using keypoints from a different source is not yet implemented.
    * @return True if successful.
    */
+  virtual bool detectAndDescribeWithLidar(size_t cameraIndex,
+                                 std::shared_ptr<okvis::MultiFrameWithLidar> frameOut,
+                                 const okvis::kinematics::Transformation& T_WC,
+                                 const std::vector<cv::KeyPoint> * keypoints);
+
+  ///@{
+  /**
+   * @brief Detection and descriptor extraction on a per image basis.
+   * @remark This method is threadsafe.
+   * @param cameraIndex Index of camera to do detection and description.
+   * @param frameOut    Multiframe containing the frames.
+   *                    Resulting keypoints and descriptors are saved in here.
+   * @param T_WC        Pose of camera with index cameraIndex at image capture time.
+   * @param[in] keypoints If the keypoints are already available from a different source, provide them here
+   *                      in order to skip detection.
+   * @warning Using keypoints from a different source is not yet implemented.
+   * @return True if successful.
+   */
   virtual bool detectAndDescribe(size_t cameraIndex,
                                  std::shared_ptr<okvis::MultiFrame> frameOut,
                                  const okvis::kinematics::Transformation& T_WC,
@@ -108,6 +127,25 @@ class Frontend : public VioFrontendInterface {
       const okvis::VioParameters & params,
       const std::shared_ptr<okvis::MapPointVector> map,
       std::shared_ptr<okvis::MultiFrame> framesInOut, bool* asKeyframe);
+
+  /**
+   * @brief Matching as well as initialization of landmarks and state.
+   * @warning This method is not threadsafe.
+   * @warning This method uses the estimator. Make sure to not access it in another thread.
+   * @param estimator       Estimator.
+   * @param T_WS_propagated Pose of sensor at image capture time.
+   * @param params          Configuration parameters.
+   * @param map             Unused.
+   * @param framesInOut     Multiframe including the descriptors of all the keypoints.
+   * @param[out] asKeyframe Should the frame be a keyframe?
+   * @return True if successful.
+   */
+  virtual bool dataAssociationAndInitializationWithLidar(
+      okvis::Estimator& estimator,
+      okvis::kinematics::Transformation& T_WS_propagated,
+      const okvis::VioParameters & params,
+      const std::shared_ptr<okvis::MapPointVector> map,
+      std::shared_ptr<okvis::MultiFrameWithLidar> framesInOut, bool* asKeyframe);
 
   /**
    * @brief Propagates pose, speeds and biases with given IMU measurements.

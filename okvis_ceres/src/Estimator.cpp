@@ -46,7 +46,7 @@
 #include <okvis/ceres/RelativePoseError.hpp>
 #include <okvis/ceres/SpeedAndBiasError.hpp>
 #include <okvis/IdProvider.hpp>
-#include <okvis/MultiFrame.hpp>
+#include <okvis/MultiFrameWithLidar.hpp>
 #include <okvis/assert_macros.hpp>
 
 /// \brief okvis Main namespace of this package.
