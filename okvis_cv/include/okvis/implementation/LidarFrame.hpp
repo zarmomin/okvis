@@ -4,7 +4,7 @@
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
- * 
+ *
  *   * Redistributions of source code must retain the above copyright notice,
  *     this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above copyright notice,
@@ -45,63 +45,51 @@ namespace okvis {
 
 // a constructor that uses the specified geometry,
 /// detector and extractor
-LidarFrame::LidarFrame(const cv::Mat & image,
-             std::shared_ptr<cameras::CameraBase> & cameraGeometry,
-             std::shared_ptr<okvis::lidar::FeatureDetectorBase> & detector,
-             std::shared_ptr<okvis::lidar::FeatureDescriberBase> & extractor)
-    : image_(image),
-      cameraGeometry_(cameraGeometry),
-      detector_(detector),
-      extractor_(extractor)
-{
-}
+LidarFrame::LidarFrame(
+    const cv::Mat &image, std::shared_ptr<cameras::CameraBase> &cameraGeometry,
+    std::shared_ptr<okvis::lidar::FeatureDetectorBase> &detector,
+    std::shared_ptr<okvis::lidar::FeatureDescriberBase> &extractor)
+    : image_(image), cameraGeometry_(cameraGeometry), detector_(detector),
+      extractor_(extractor) {}
 
 // set the frame image;
-void LidarFrame::setImage(const cv::Mat & image)
-{
-  image_ = image;
-}
+void LidarFrame::setImage(const cv::Mat &image) { image_ = image; }
 
 // set the geometry
-void LidarFrame::setGeometry(std::shared_ptr<const cameras::CameraBase> cameraGeometry)
-{
+void LidarFrame::setGeometry(
+    std::shared_ptr<const cameras::CameraBase> cameraGeometry) {
   cameraGeometry_ = cameraGeometry;
 }
 
 // set the detector
-void LidarFrame::setDetector(std::shared_ptr<okvis::lidar::FeatureDetectorBase> detector)
-{
+void LidarFrame::setDetector(
+    std::shared_ptr<okvis::lidar::FeatureDetectorBase> detector) {
   detector_ = detector;
 }
 
 // set the extractor
-void LidarFrame::setExtractor(std::shared_ptr<okvis::lidar::FeatureDescriberBase> extractor)
-{
+void LidarFrame::setExtractor(
+    std::shared_ptr<okvis::lidar::FeatureDescriberBase> extractor) {
   extractor_ = extractor;
 }
 
 // obtain the image
-const cv::Mat & LidarFrame::image() const
-{
-  return image_;
-}
+const cv::Mat &LidarFrame::image() const { return image_; }
 
 // get the base class geometry (will be slow to use)
-std::shared_ptr<const cameras::CameraBase> LidarFrame::geometry() const
-{
+std::shared_ptr<const cameras::CameraBase> LidarFrame::geometry() const {
   return cameraGeometry_;
 }
 
 // detect keypoints. This uses virtual function calls.
 ///        That's a negligibly small overhead for many detections.
 ///        returns the number of detected points.
-int LidarFrame::detect()
-{
+int LidarFrame::detect() {
   // currently all points allowed
   cv::Mat detection_mask(image_.rows, image_.cols, CV_8UC1, cv::Scalar(255));
 
-  // make sure things are set to zero for safety
-  keypoints_;
+  // todo(nscheidt): make sure things are set to zero for safety
+  // keypoints_;
 
   // run the detector
   OKVIS_ASSERT_TRUE_DBG(Exception, detector_ != NULL,
@@ -114,8 +102,7 @@ int LidarFrame::detect()
 ///        That's a negligibly small overhead for many detections.
 ///        \param extractionDirection the extraction direction in camera frame
 ///        returns the number of detected points.
-int LidarFrame::describe(const Eigen::Vector3d & extractionDirection)
-{
+int LidarFrame::describe(const Eigen::Vector3d &extractionDirection) {
   // check initialisation
   OKVIS_ASSERT_TRUE_DBG(Exception, extractor_ != NULL,
                         "Detector not initialised!");
@@ -128,7 +115,7 @@ int LidarFrame::describe(const Eigen::Vector3d & extractionDirection)
   Eigen::Matrix<double, 2, 3> Jacobian;
   Eigen::Vector2d eg_projected;
   for (size_t k = 0; k < keypoints_cv.size(); ++k) {
-    cv::KeyPoint& ckp = keypoints_cv[k];
+    cv::KeyPoint &ckp = keypoints_cv[k];
     // project ray
     cameraGeometry_->backProject(Eigen::Vector2d(ckp.pt.x, ckp.pt.y), &ep);
     // obtain image Jacobian
@@ -141,7 +128,7 @@ int LidarFrame::describe(const Eigen::Vector3d & extractionDirection)
   }
   CvKeypointsToKeyframeFeatures(keypoints_cv, &keypoints_);
   extractor_->describeFeatures(image_, &keypoints_);
-
+  return numKeypoints();
 }
 
 int LidarFrame::describe() {
@@ -153,4 +140,4 @@ size_t LidarFrame::numKeypoints() const {
   return keypoints_.keypoint_measurements.cols();
 }
 
-}  // namespace okvis
+} // namespace okvis

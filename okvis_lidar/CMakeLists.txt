@@ -5,14 +5,6 @@ project(okvis_lidar)
 find_package( Eigen REQUIRED )
 include_directories(${EIGEN_INCLUDE_DIR})
 
-find_package(aslam_cv_cameras REQUIRED)
-find_package(aslam_cv_common REQUIRED)
-find_package(aslam_cv_frames REQUIRED)
-find_package(aslam_cv_geometric_vision REQUIRED)
-find_package(aslam_cv_visualization REQUIRED)
-find_package(aslam_cv_matcher REQUIRED)
-find_package(minkindr REQUIRED)
-
 #############
 # LIBRARIES #
 #############
