@@ -109,7 +109,7 @@ class MultiFrame
   /// \brief Set the frame image;
   /// @param[in] cameraIdx The camera index that took the image.
   /// @param[in] image The image.
-  inline void setImage(size_t cameraIdx, const cv::Mat & image);
+  inline virtual void setImage(size_t cameraIdx, const cv::Mat & image);
 
   /// \brief Set the geometry
   /// @param[in] cameraIdx The camera index.

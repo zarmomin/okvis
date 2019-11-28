@@ -89,11 +89,11 @@ int LidarFrame::detect() {
   cv::Mat detection_mask(image_.rows, image_.cols, CV_8UC1, cv::Scalar(255));
 
   // todo(nscheidt): make sure things are set to zero for safety
-  // keypoints_;
 
   // run the detector
   OKVIS_ASSERT_TRUE_DBG(Exception, detector_ != NULL,
                         "Detector not initialised!");
+  // todo(nscheidt): remove hardcoding
   detector_->detectFeatures(image_, 300, detection_mask, &keypoints_);
   return numKeypoints();
 }

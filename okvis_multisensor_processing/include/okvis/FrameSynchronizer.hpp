@@ -45,7 +45,7 @@
 
 #include <memory>
 #include <okvis/Measurements.hpp>
-#include <okvis/MultiFrame.hpp>
+#include <okvis/MultiFrameWithLidar.hpp>
 #include <okvis/VioInterface.hpp>
 #include <okvis/Parameters.hpp>
 #include <okvis/assert_macros.hpp>
@@ -81,7 +81,7 @@ class FrameSynchronizer {
    * @param frame New frame.
    * @return Multiframe with the added frame in it.
    */
-  std::shared_ptr<okvis::MultiFrame> addNewFrame(
+  std::shared_ptr<okvis::MultiFrameWithLidar> addNewFrame(
       std::shared_ptr<okvis::CameraMeasurement> &frame);
 
   /**
@@ -136,7 +136,7 @@ class FrameSynchronizer {
   /// Timestamp tolerance to classify multiple frames as being part of the same multiframe.
   double timeTol_;
   /// Circular buffer containing a multiframe pointer and a counter for how many times detection has completed.
-  std::vector<std::pair<std::shared_ptr<okvis::MultiFrame>, size_t> > frameBuffer_;
+  std::vector<std::pair<std::shared_ptr<okvis::MultiFrameWithLidar>, size_t> > frameBuffer_;
   /// Position of the newest multiframe in the buffer.
   int bufferPosition_;
 

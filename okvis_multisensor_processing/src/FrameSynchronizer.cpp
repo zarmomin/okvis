@@ -61,7 +61,7 @@ FrameSynchronizer::FrameSynchronizer(okvis::VioParameters& parameters)
     init(parameters);
   }
   frameBuffer_.resize(max_frame_sync_buffer_size,
-                      std::pair<std::shared_ptr<okvis::MultiFrame>,size_t>(nullptr,0));
+                      std::pair<std::shared_ptr<okvis::MultiFrameWithLidar>,size_t>(nullptr,0));
   bufferPosition_ = 0;
 }
 
@@ -78,10 +78,10 @@ void FrameSynchronizer::init(okvis::VioParameters& parameters) {
 }
 
 // Adds a new frame to the internal buffer and returns the Multiframe containing the frame.
-std::shared_ptr<okvis::MultiFrame> FrameSynchronizer::addNewFrame(std::shared_ptr<okvis::CameraMeasurement>& frame) {
+std::shared_ptr<okvis::MultiFrameWithLidar> FrameSynchronizer::addNewFrame(std::shared_ptr<okvis::CameraMeasurement>& frame) {
   assert(numCameras_ > 0);
   okvis::Time frame_stamp = frame->timeStamp;
-  std::shared_ptr<okvis::MultiFrame> multiFrame;
+  std::shared_ptr<okvis::MultiFrameWithLidar> multiFrame;
   int position;
   if(findFrameByTime(frame_stamp,position)) {
     multiFrame = frameBuffer_[position].first;
@@ -95,7 +95,7 @@ std::shared_ptr<okvis::MultiFrame> FrameSynchronizer::addNewFrame(std::shared_pt
     multiFrame->setImage(frame->sensorId,frame->measurement.image);
   }
   else {
-    multiFrame = std::shared_ptr<okvis::MultiFrame>(new okvis::MultiFrame(parameters_.nCameraSystem,frame_stamp,
+    multiFrame = std::shared_ptr<okvis::MultiFrameWithLidar>(new okvis::MultiFrameWithLidar(parameters_.nCameraSystem,frame_stamp,
                                                                           okvis::IdProvider::instance().newId()));
     multiFrame->setImage(frame->sensorId,frame->measurement.image);
     bufferPosition_ = (bufferPosition_+1) % max_frame_sync_buffer_size;

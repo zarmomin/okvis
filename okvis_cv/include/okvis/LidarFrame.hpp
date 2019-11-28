@@ -4,7 +4,7 @@
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
- * 
+ *
  *   * Redistributions of source code must retain the above copyright notice,
  *     this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above copyright notice,
@@ -41,8 +41,8 @@
 #ifndef INCLUDE_OKVIS_LIDAR_FRAME_HPP_
 #define INCLUDE_OKVIS_LIDAR_FRAME_HPP_
 
-#include <Eigen/StdVector>
 #include <Eigen/Core>
+#include <Eigen/StdVector>
 #include <memory>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
@@ -63,16 +63,13 @@ namespace okvis {
 
 /// \class LidarFrame
 /// \brief A single camera frame equipped with keypoint detector / extractor.
-class LidarFrame
-{
- public:
+class LidarFrame {
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   OKVIS_DEFINE_EXCEPTION(Exception, std::runtime_error)
 
   /// \brief a default constructor
-  inline LidarFrame()
-  {
-  }
+  inline LidarFrame() {}
 
   /// \brief A constructor that uses the image, specified geometry,
   /// detector and extractor
@@ -80,35 +77,37 @@ class LidarFrame
   /// @param[in] cameraGeometry The camera geometry.
   /// @param[in] detector The detector to be used.
   /// @param[in] extractor The extractor to be used.
-  inline LidarFrame(const cv::Mat & image,
-        std::shared_ptr<cameras::CameraBase> & cameraGeometry,
-        std::shared_ptr<okvis::lidar::FeatureDetectorBase> & detector,
-        std::shared_ptr<okvis::lidar::FeatureDescriberBase> & extractor);
+  inline LidarFrame(
+      const cv::Mat &image,
+      std::shared_ptr<cameras::CameraBase> &cameraGeometry,
+      std::shared_ptr<okvis::lidar::FeatureDetectorBase> &detector,
+      std::shared_ptr<okvis::lidar::FeatureDescriberBase> &extractor);
 
   /// \brief A simple destructor
-  inline virtual ~LidarFrame()
-  {
-  }
+  inline virtual ~LidarFrame() {}
 
   /// \brief Set the frame image;
   /// @param[in] image The image.
-  inline void setImage(const cv::Mat & image);
+  inline void setImage(const cv::Mat &image);
 
   /// \brief Set the geometry
   /// @param[in] cameraGeometry The camera geometry.
-  inline void setGeometry(std::shared_ptr<const cameras::CameraBase> cameraGeometry);
+  inline void
+  setGeometry(std::shared_ptr<const cameras::CameraBase> cameraGeometry);
 
   /// \brief Set the detector
   /// @param[in] detector The detector to be used.
-  inline void setDetector(std::shared_ptr<okvis::lidar::FeatureDetectorBase> detector);
+  inline void
+  setDetector(std::shared_ptr<okvis::lidar::FeatureDetectorBase> detector);
 
   /// \brief Set the extractor
   /// @param[in] extractor The extractor to be used.
-  inline void setExtractor(std::shared_ptr<okvis::lidar::FeatureDescriberBase> extractor);
+  inline void
+  setExtractor(std::shared_ptr<okvis::lidar::FeatureDescriberBase> extractor);
 
   /// \brief Obtain the image
   /// \return The image.
-  inline const cv::Mat & image() const;
+  inline const cv::Mat &image() const;
 
   /// \brief get the base class geometry (will be slow to use)
   /// \return The camera geometry.
@@ -121,11 +120,12 @@ class LidarFrame
 
   /// \brief Describe keypoints. This uses virtual function calls.
   ///        That's a negligibly small overhead for many detections.
-  /// @warning SLOW since we have to copy them over to/from cv::Keypoints a couple of times
+  /// @warning SLOW since we have to copy them over to/from cv::Keypoints a
+  /// couple of times
   /// \param extractionDirection The extraction direction in camera frame
   /// \return The number of detected points.
   inline int describe(
-      const Eigen::Vector3d & extractionDirection = Eigen::Vector3d(0, 0, 1));
+      const Eigen::Vector3d &extractionDirection = Eigen::Vector3d(0, 0, 1));
 
   /// \brief Describe keypoints. This uses virtual function calls.
   ///        That's a negligibly small overhead for many detections.
@@ -133,64 +133,71 @@ class LidarFrame
   /// \return The number of detected points.
   inline int describe();
 
-//  /// \brief Access a specific keypoint in OpenCV format
-//  /// @param[in] keypointIdx The requested keypoint's index.
-//  /// @param[out] keypoint The requested keypoint.
-//  /// \return whether or not the operation was successful.
-//  inline bool getCvKeypoint(size_t keypointIdx, cv::KeyPoint & keypoint) const;
-//
-//  /// \brief Get a specific keypoint
-//  /// @param[in] keypointIdx The requested keypoint's index.
-//  /// @param[out] keypoint The requested keypoint.
-//  /// \return whether or not the operation was successful.
-//  inline bool getKeypoint(size_t keypointIdx, Eigen::Vector2d & keypoint) const;
-//
-//  /// \brief Get the size of a specific keypoint
-//  /// @param[in] keypointIdx The requested keypoint's index.
-//  /// @param[out] keypointSize The requested keypoint's size.
-//  /// \return whether or not the operation was successful.
-//  inline bool getKeypointSize(size_t keypointIdx, double & keypointSize) const;
-//
-//  /// \brief Access the descriptor -- CAUTION: high-speed version.
-//  /// @param[in] keypointIdx The requested keypoint's index.
-//  /// \return The descriptor data pointer; NULL if out of bounds.
-//  inline const unsigned char * keypointDescriptor(size_t keypointIdx);
-//
-//  /// \brief Set the landmark ID
-//  /// @param[in] keypointIdx The requested keypoint's index.
-//  /// @param[in] landmarkId The landmark Id.
-//  /// \return whether or not the operation was successful.
-//  inline bool setLandmarkId(size_t keypointIdx, uint64_t landmarkId);
-//
-//  /// \brief Access the landmark ID
-//  /// @param[in] keypointIdx The requested keypoint's index.
-//  /// \return The landmark Id.
-//  inline uint64_t landmarkId(size_t keypointIdx) const;
-//
-//  /// \brief Provide keypoints externally.
-//  /// @param[in] keypoints A vector of keyoints.
-//  /// \return whether or not the operation was successful.
-//  inline bool resetKeypoints(const std::vector<cv::KeyPoint> & keypoints);
-//
-//  /// \brief provide descriptors externally
-//  /// @param[in] descriptors A vector of descriptors.
-//  /// \return whether or not the operation was successful.
-//  inline bool resetDescriptors(const cv::Mat & descriptors);
+  //  /// \brief Access a specific keypoint in OpenCV format
+  //  /// @param[in] keypointIdx The requested keypoint's index.
+  //  /// @param[out] keypoint The requested keypoint.
+  //  /// \return whether or not the operation was successful.
+  //  inline bool getCvKeypoint(size_t keypointIdx, cv::KeyPoint & keypoint)
+  //  const;
+  //
+  //  /// \brief Get a specific keypoint
+  //  /// @param[in] keypointIdx The requested keypoint's index.
+  //  /// @param[out] keypoint The requested keypoint.
+  //  /// \return whether or not the operation was successful.
+  //  inline bool getKeypoint(size_t keypointIdx, Eigen::Vector2d & keypoint)
+  //  const;
+  //
+  //  /// \brief Get the size of a specific keypoint
+  //  /// @param[in] keypointIdx The requested keypoint's index.
+  //  /// @param[out] keypointSize The requested keypoint's size.
+  //  /// \return whether or not the operation was successful.
+  //  inline bool getKeypointSize(size_t keypointIdx, double & keypointSize)
+  //  const;
+  //
+  //  /// \brief Access the descriptor -- CAUTION: high-speed version.
+  //  /// @param[in] keypointIdx The requested keypoint's index.
+  //  /// \return The descriptor data pointer; NULL if out of bounds.
+  //  inline const unsigned char * keypointDescriptor(size_t keypointIdx);
+  //
+  //  /// \brief Set the landmark ID
+  //  /// @param[in] keypointIdx The requested keypoint's index.
+  //  /// @param[in] landmarkId The landmark Id.
+  //  /// \return whether or not the operation was successful.
+  //  inline bool setLandmarkId(size_t keypointIdx, uint64_t landmarkId);
+  //
+  //  /// \brief Access the landmark ID
+  //  /// @param[in] keypointIdx The requested keypoint's index.
+  //  /// \return The landmark Id.
+  //  inline uint64_t landmarkId(size_t keypointIdx) const;
+  //
+  //  /// \brief Provide keypoints externally.
+  //  /// @param[in] keypoints A vector of keyoints.
+  //  /// \return whether or not the operation was successful.
+  //  inline bool resetKeypoints(const std::vector<cv::KeyPoint> & keypoints);
+  //
+  //  /// \brief provide descriptors externally
+  //  /// @param[in] descriptors A vector of descriptors.
+  //  /// \return whether or not the operation was successful.
+  //  inline bool resetDescriptors(const cv::Mat & descriptors);
 
   /// \brief Get the number of keypoints.
   /// \return The number of keypoints.
   inline size_t numKeypoints() const;
 
- protected:
-  cv::Mat image_;  ///< the image as OpenCV's matrix
-  std::shared_ptr<const cameras::CameraBase> cameraGeometry_;  ///< the camera geometry
-  std::shared_ptr<okvis::lidar::FeatureDetectorBase> detector_;  ///< the detector
-  std::shared_ptr<okvis::lidar::FeatureDescriberBase> extractor_;  ///< the extractor
-  okvis::lidar::KeyframeFeatures keypoints_;  ///< we store keypoints in a struct with their track ids and descriptors
-
+protected:
+  cv::Mat image_; ///< the image as OpenCV's matrix
+  std::shared_ptr<const cameras::CameraBase>
+      cameraGeometry_; ///< the camera geometry
+  std::shared_ptr<okvis::lidar::FeatureDetectorBase>
+      detector_; ///< the detector
+  std::shared_ptr<okvis::lidar::FeatureDescriberBase>
+      extractor_;                            ///< the extractor
+  okvis::lidar::KeyframeFeatures keypoints_; ///< we store keypoints in a struct
+                                             ///with their track ids and
+                                             ///descriptors
 };
 
-}  // namespace okvis
+} // namespace okvis
 
 #include "implementation/LidarFrame.hpp"
 
